@@ -1,36 +1,44 @@
-
-package producerconsumer;
-
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class Producer extends Thread {
     Buffer buffer;
-    
-    Producer(Buffer buffer) {
+    int min;
+    int max;
+    boolean isRunning;
+
+    Producer(Buffer buffer, int max, int min) {
         this.buffer = buffer;
+        this.max = max;
+        this.min = min;
+        this.isRunning = true;
     }
-    
+
     @Override
     public void run() {
         System.out.println("Running Producer...");
-        String products = "AEIOU";
-        Random r = new Random(System.currentTimeMillis());
-        char product;
-        
-        for(int i=0 ; i<5 ; i++) {
-            product = products.charAt(r.nextInt(5));
-            this.buffer.produce(product);
-            //System.out.println("Producer produced: " + product);
-            Buffer.print("Producer produced: " + product);
-            
+        while (this.isRunning) {
+            // Create random scheme operation
+            SchemeOp schemeOperation = new SchemeOp(this.max, this.min);
+            int arreglo[] = schemeOperation.createRandomNumbers();
+            String operacionRandom = schemeOperation.createRandomOperation();
+            String formatOperation = schemeOperation.toSchemeFormat(arreglo, operacionRandom);
+            schemeOperation.setOperation(formatOperation);
+
+            // OPERACIONES -> AL BUFFER
+            this.buffer.produce(schemeOperation);
+
             try {
-                Thread.sleep(1000);
+                Thread.sleep(this.buffer.timeConsumer);
             } catch (InterruptedException ex) {
-                Logger.getLogger(Producer.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("ERROR AT PRODUCER " + ex);
             }
+
         }
+
     }
     
+    // STOP BUTTON
+    public void stopThread() {
+        this.isRunning = false;
+    }
+
 }
+
