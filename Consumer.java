@@ -1,11 +1,11 @@
-
-package producerconsumer;
-
+// Luis
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Consumer extends Thread {
+
     Buffer buffer;
+    boolean isRunning = true;
     
     Consumer(Buffer buffer) {
         this.buffer = buffer;
@@ -14,18 +14,31 @@ public class Consumer extends Thread {
     @Override
     public void run() {
         System.out.println("Running Consumer...");
-        char product;
-        
-        for(int i=0 ; i<5 ; i++) {
+        SchemeOp product;
+        // IF available space Compute and sent to buffer
+        while (this.isRunning) {
             product = this.buffer.consume();
-            //System.out.println("Consumer consumed: " + product);
-            Buffer.print("Consumer consumed: " + product);
-            
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Producer.class.getName()).log(Level.SEVERE, null, ex);
+
+            if (product != null) {
+                SchemeOp.compute(product);
+                Buffer.print("Consumer Consumed ID -> " + product.getID() + " Result -> " + product.getResult());
+                GUIFrame.tableComplete(product.getID(), product.getOperation(), product.getResult());
+            } else {
+
+                try {
+                    Thread.sleep(this.buffer.timeProducer);
+
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Producer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                stopThread();
             }
         }
+    }
+
+    // STOP THREAD 
+    public void stopThread() {
+        this.isRunning = false;
     }
 }
