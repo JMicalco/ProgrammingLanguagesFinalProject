@@ -1,4 +1,4 @@
-mport javax.swing.SwingUtilities;
+import javax.swing.SwingUtilities;
 //Clase principal 
 //Producer-Consumer
 
